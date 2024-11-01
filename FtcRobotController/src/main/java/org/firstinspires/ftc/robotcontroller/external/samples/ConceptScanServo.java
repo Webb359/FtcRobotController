@@ -66,13 +66,11 @@ public class ConceptScanServo extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
         servo = hardwareMap.get(Servo.class, "left_hand");
 
-        // Wait for the start button
-        telemetry.addData(">", "Press Start to scan Servo." );
-        telemetry.update();
+        telemetry.addData(">", "Press Start to scan Servo." );        // Wait for the start button
+        telemetry.update();        // Connect to servo (Assume Robot Left Hand)
         waitForStart();
 
 
