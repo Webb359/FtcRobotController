@@ -124,7 +124,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
         double y = 0; // Remember, Y stick value is reversed
         double x = 0;
         double rx = 0;
-        double up = 0;
+        boolean up;
         double down = 0;
 
         // run until the end of the match (driver presses STOP)
@@ -134,8 +134,8 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             y = -gamepad1.left_stick_y * 0.5;
             x = gamepad1.left_stick_x; // Counteract imperfect strafing
             rx = gamepad1.right_stick_x;
-            up = gamepad1.right_trigger;
-            down = gamepad1.left_trigger;
+            up = gamepad1.right_bumper;
+            down = gamepad1.right_trigger;
 
 
             // Denominator is the largest motor power (absolute value) or 1
@@ -146,25 +146,37 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             double backLeftPower = (y - x + rx) / denominator;
             double frontRightPower = (y - x - rx) / denominator;
             double backRightPower = (y + x - rx) / denominator;
-            if (gamepad1.right_trigger > 0) {
-                leftArm.setPower(up);
-                leftArm.setPower(up);
+            if (up)
+            {
+                leftArm.setPower(.5);
+                rightArm.setPower(.5);
             }
-            if (gamepad1.left_trigger > 0) {
+            else {
+                leftArm.setPower(0);
+                rightArm.setPower(0);
+            }
+            if (gamepad1.right_trigger > 0)
+            {
                 leftArm.setPower(-down);
                 leftArm.setPower(-down);
             }
+            else
+            {
+                leftArm.setPower(0);
+                rightArm.setPower(0);
+            }
+
             leftFront.setPower(frontLeftPower);
             leftBack.setPower(-backLeftPower);
             rightFront.setPower(frontRightPower);
             rightBack.setPower(backRightPower);
             //servo range is 0-180 degrees(0 = 0 degrees, 1 = 180 degrees)
-            if (gamepad1.right_bumper) {
-                claw.setPosition(1);
-            }
-            if (gamepad1.left_bumper) {
-                claw.setPosition(0);
+//            if (gamepad1.right_bumper) {
+//                claw.setPosition(1);
+//            }
+//            if (gamepad1.left_bumper) {
+//                claw.setPosition(0);
             }
 
         }
-    }}
+    }
