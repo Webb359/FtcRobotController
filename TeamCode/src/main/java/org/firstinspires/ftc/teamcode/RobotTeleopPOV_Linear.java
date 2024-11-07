@@ -158,7 +158,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             if (gamepad1.right_trigger > 0)
             {
                 leftArm.setPower(-down);
-                leftArm.setPower(-down);
+                rightArm.setPower(-down);
             }
             else
             {
