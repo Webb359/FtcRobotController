@@ -46,8 +46,8 @@ public class RobotHardware {
         rightBack = hardwareMap.get(DcMotor.class, "right_back");
         leftArm = hardwareMap.get(DcMotor.class, "left_arm");
         rightArm = hardwareMap.get(DcMotor.class, "right_arm");
-        leftClaw = hardwareMap.get(Servo.class, "left_hand");
-        rightClaw = hardwareMap.get(Servo.class, "right_hand");
+//        leftClaw = hardwareMap.get(Servo.class, "left_hand");
+//        rightClaw = hardwareMap.get(Servo.class, "right_hand");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
