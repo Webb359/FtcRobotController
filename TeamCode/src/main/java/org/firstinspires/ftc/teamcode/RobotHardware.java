@@ -31,6 +31,7 @@ public class RobotHardware {
     static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double ROBOT_WIDTH_INCHES = 18.0;       // Distance between left and right wheels
 
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
@@ -151,9 +152,55 @@ public class RobotHardware {
         telemetry.update();
     }
 
-    public void rotate_encoders(double theta,double speed,double timeout){
+    public void rotate_encoders(double theta, double speed, double timeout) {
+        double radians = Math.toRadians(theta);
+        double arcLength = (ROBOT_WIDTH_INCHES / 2.0) * radians;
 
+        // Convert arc length to encoder counts
+        int targetPositionCounts = (int) (arcLength * COUNTS_PER_INCH);
+
+        // Set target positions for rotating the robot base
+        // Left side moves forward and right side moves backward for a counter-clockwise rotation
+        leftFront.setTargetPosition(leftFront.getCurrentPosition() + targetPositionCounts);
+        leftBack.setTargetPosition(leftBack.getCurrentPosition() + targetPositionCounts);
+        rightFront.setTargetPosition(rightFront.getCurrentPosition() - targetPositionCounts);
+        rightBack.setTargetPosition(rightBack.getCurrentPosition() - targetPositionCounts);
+
+        // Set motors to run to position mode
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        runtime.reset();
+
+        // Set motor power to initiate the rotation
+        leftFront.setPower(speed);
+        leftBack.setPower(speed);
+        rightFront.setPower(speed);
+        rightBack.setPower(speed);
+
+        // Loop until rotation completes or timeout is reached
+        while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
+                && runtime.seconds() < timeout
+                && myOpMode.opModeIsActive()) {
+            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+            telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
+            telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop the motors after rotation completes
+        stopDrive();
+
+        // Reset motors to run without encoder mode for normal operation
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
 
     public void setArmPower(double power) {
         leftArm.setPower(power);
