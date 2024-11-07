@@ -9,11 +9,12 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
+        telemetry.addData(">", "Robot Ready.  Press START.");    //
+        telemetry.update();
         waitForStart();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        telemetry.addData(">", "Robot Ready.  Press START.");    //
-        telemetry.update();
+
         while (opModeIsActive()) {
             if (gamepad1.right_bumper) {
                 robot.setArmPower(0.5);
@@ -26,7 +27,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             }
             robot.drive(gamepad1.left_stick_x, gamepad1.left_stick_y*0.5, gamepad1.right_stick_x);
             telemetry.addData("Status", "Running");
-
+            telemetry.update();
 
         }
 
