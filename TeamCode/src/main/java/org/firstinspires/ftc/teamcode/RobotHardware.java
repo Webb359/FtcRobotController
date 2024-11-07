@@ -26,6 +26,12 @@ public class RobotHardware {
     private ElapsedTime runtime = new ElapsedTime();
     public static final double MID_SERVO = 0.5;
 
+    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
         telemetry = opMode.telemetry;
@@ -94,10 +100,10 @@ public class RobotHardware {
         double rightFrontDistance = (y - x);
         double rightBackDistance = (y + x);
 
-        leftFront.setTargetPosition((int) leftFrontDistance + leftFront.getCurrentPosition());
-        leftBack.setTargetPosition((int) leftBackDistance + leftBack.getCurrentPosition());
-        rightFront.setTargetPosition((int) rightFrontDistance + rightFront.getCurrentPosition());
-        rightBack.setTargetPosition((int) rightBackDistance + rightBack.getCurrentPosition());
+        leftFront.setTargetPosition((int) (leftFrontDistance*COUNTS_PER_INCH) + leftFront.getCurrentPosition());
+        leftBack.setTargetPosition((int) (leftBackDistance*COUNTS_PER_INCH) + leftBack.getCurrentPosition());
+        rightFront.setTargetPosition((int) (rightFrontDistance*COUNTS_PER_INCH) + rightFront.getCurrentPosition());
+        rightBack.setTargetPosition((int) (rightBackDistance*COUNTS_PER_INCH) + rightBack.getCurrentPosition());
 
         telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
         telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
@@ -124,6 +130,10 @@ public class RobotHardware {
             telemetry.addData("leftBackPower", leftBack.getPower());
             telemetry.addData("rightFrontPower", rightFront.getPower());
             telemetry.addData("rightBackPower", rightBack.getPower());
+            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+            telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
+            telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
             telemetry.update();
         }
 
@@ -139,6 +149,10 @@ public class RobotHardware {
         telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
         telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
         telemetry.update();
+    }
+
+    public void rotate_encoders(double theta,double speed,double timeout){
+
     }
 
     public void setArmPower(double power) {
