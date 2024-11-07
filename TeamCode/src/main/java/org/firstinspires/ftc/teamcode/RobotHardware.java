@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class RobotHardware {
     private Telemetry telemetry;
     private LinearOpMode myOpMode = null;
-    public IMU imu= null;
+    public IMU imu = null;
     public DcMotor leftFront = null;
     public DcMotor leftBack = null;
     public DcMotor rightFront = null;
@@ -25,10 +25,12 @@ public class RobotHardware {
 
     private ElapsedTime runtime = new ElapsedTime();
     public static final double MID_SERVO = 0.5;
+
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
         telemetry = opMode.telemetry;
     }
+
     public void init(HardwareMap hardwareMap) {
         imu = hardwareMap.get(IMU.class, "imu");
         leftFront = hardwareMap.get(DcMotor.class, "left_front");
@@ -37,8 +39,8 @@ public class RobotHardware {
         rightBack = hardwareMap.get(DcMotor.class, "right_back");
         leftArm = hardwareMap.get(DcMotor.class, "left_arm");
         rightArm = hardwareMap.get(DcMotor.class, "right_arm");
-        leftClaw = hardwareMap.get(Servo.class, "left_hand"); // Corrected to Servo.class
-        rightClaw = hardwareMap.get(Servo.class, "right_hand"); // Corrected to Servo.class
+        leftClaw = hardwareMap.get(Servo.class, "left_hand");
+        rightClaw = hardwareMap.get(Servo.class, "right_hand");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
@@ -62,41 +64,46 @@ public class RobotHardware {
         imu.initialize(parameters);
     }
 
-    public void drive(double x,double y, double theta){
+    public void drive(double x, double y, double theta) {
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
         double leftFrontPower = (y + x + theta) / denominator;
         double leftBackPower = (y - x + theta) / denominator;
         double rightFrontPower = (y - x - theta) / denominator;
         double rightBackPower = (y + x - theta) / denominator;
+
         leftFront.setPower(leftFrontPower);
         leftBack.setPower(leftBackPower);
         rightFront.setPower(rightFrontPower);
         rightBack.setPower(rightBackPower);
+
         telemetry.addData("leftFrontPower", leftFrontPower);
         telemetry.addData("leftBackPower", leftBackPower);
         telemetry.addData("rightFrontPower", rightFrontPower);
         telemetry.addData("rightBackPower", rightBackPower);
+        telemetry.update();
     }
 
-    public void drive_encoders(double x,double y,double speed, double timeout){
+    public void drive_encoders(double x, double y, double speed, double timeout) {
         double leftFrontDistance = (y + x);
         double leftBackDistance = (y - x);
         double rightFrontDistance = (y - x);
         double rightBackDistance = (y + x);
 
-        leftFront.setTargetPosition((int)leftFrontDistance+leftFront.getCurrentPosition());
-        leftBack.setTargetPosition((int)leftBackDistance+leftBack.getCurrentPosition());
-        rightFront.setTargetPosition((int)rightFrontDistance+rightFront.getCurrentPosition());
-        rightBack.setTargetPosition((int)rightBackDistance+rightBack.getCurrentPosition());
+        leftFront.setTargetPosition((int) leftFrontDistance + leftFront.getCurrentPosition());
+        leftBack.setTargetPosition((int) leftBackDistance + leftBack.getCurrentPosition());
+        rightFront.setTargetPosition((int) rightFrontDistance + rightFront.getCurrentPosition());
+        rightBack.setTargetPosition((int) rightBackDistance + rightBack.getCurrentPosition());
 
         telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
         telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
         telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
         telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
+        telemetry.update();
 
         leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -107,20 +114,20 @@ public class RobotHardware {
 
         while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
                 && runtime.seconds() < timeout
-                &&myOpMode.opModeIsActive()) {
+                && myOpMode.opModeIsActive()) {
             leftFront.setPower(speed);
             leftBack.setPower(speed);
             rightFront.setPower(speed);
             rightBack.setPower(speed);
+
             telemetry.addData("leftFrontPower", leftFront.getPower());
             telemetry.addData("leftBackPower", leftBack.getPower());
             telemetry.addData("rightFrontPower", rightFront.getPower());
             telemetry.addData("rightBackPower", rightBack.getPower());
+            telemetry.update();
         }
-        leftFront.setPower(0);
-        leftBack.setPower(0);
-        rightFront.setPower(0);
-        rightBack.setPower(0);
+
+        stopDrive();
 
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -131,6 +138,7 @@ public class RobotHardware {
         telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
         telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
         telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
+        telemetry.update();
     }
 
     public void setArmPower(double power) {
