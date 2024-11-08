@@ -206,6 +206,7 @@ public class RobotHardware {
     public void setArmPower(double power) {
         leftArm.setPower(power);
         rightArm.setPower(power);
+        telemetry.addData("Arm Power",power);
     }
 
     public void setClawPosition(double position) {
