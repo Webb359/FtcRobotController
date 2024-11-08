@@ -1,134 +1,245 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*
- * This file defines a Java Class that performs all the setup and configuration for a sample robot's hardware (motors and sensors).
- * It assumes three motors (left_drive, right_drive, and arm) and two servos (left_hand and right_hand).
- *
- * This one file/class can be used by ALL of your OpModes without having to cut & paste the code each time.
- * It is recommended to make the actual hardware objects private so that they can't be accessed externally.
- */
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class RobotHardware {
-
-    /* Declare OpMode members. */
-    // private LinearOpMode myOpMode = null;   // Gain access to methods in the calling OpMode.
-
-    // Define Motor and Servo objects (Make them private so they can't be accessed externally)
+    private Telemetry telemetry;
+    private LinearOpMode myOpMode = null;
+    public IMU imu = null;
     public DcMotor leftFront = null;
     public DcMotor leftBack = null;
-    public DcMotor rightBack = null;
     public DcMotor rightFront = null;
+    public DcMotor rightBack = null;
     public DcMotor leftArm = null;
     public DcMotor rightArm = null;
     public Servo leftClaw = null;
     public Servo rightClaw = null;
-    public DcMotor elevatorLeft = null;
-    public DcMotor elevatorRight = null;
 
-    // Define Drive constants. Make them public so they CAN be used by the calling OpMode
+    private ElapsedTime runtime = new ElapsedTime();
     public static final double MID_SERVO = 0.5;
 
-    // Define a constructor that allows the OpMode to pass a reference to itself.
-    // public RobotHardware(LinearOpMode opmode) { myOpMode = opmode; }
+    static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: TETRIX Motor Encoder
+    static final double DRIVE_GEAR_REDUCTION = 1.0;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
+    static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double ROBOT_WIDTH_INCHES = 18.0;       // Distance between left and right wheels
 
-    public RobotHardware() {
+    public RobotHardware(LinearOpMode opMode) {
+        myOpMode = opMode;
+        telemetry = opMode.telemetry;
     }
 
-    /**
-     * Initialize all the robot's hardware.
-     * This method must be called ONCE when the OpMode is initialized.
-     * <p>
-     * All of the hardware devices are accessed via the hardware map and initialized.
-     */
     public void init(HardwareMap hardwareMap) {
-        // Define and Initialize Motors
+        imu = hardwareMap.get(IMU.class, "imu");
         leftFront = hardwareMap.get(DcMotor.class, "left_front");
         leftBack = hardwareMap.get(DcMotor.class, "left_back");
         rightFront = hardwareMap.get(DcMotor.class, "right_front");
         rightBack = hardwareMap.get(DcMotor.class, "right_back");
         leftArm = hardwareMap.get(DcMotor.class, "left_arm");
         rightArm = hardwareMap.get(DcMotor.class, "right_arm");
-        leftClaw = hardwareMap.get(Servo.class, "left_hand"); // Corrected to Servo.class
-        rightClaw = hardwareMap.get(Servo.class, "right_hand"); // Corrected to Servo.class
-        elevatorLeft = hardwareMap.get(DcMotor.class, "elevator_left");
-        elevatorRight = hardwareMap.get(DcMotor.class, "elevator_right");
+//        leftClaw = hardwareMap.get(Servo.class, "left_hand");
+//        rightClaw = hardwareMap.get(Servo.class, "right_hand");
 
-        // To drive forward, most robots need the motor on one side to be reversed.
-        // Adjust these directions based on your first test drive.
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
 
-        // Initialize servos
-        leftClaw.setPosition(MID_SERVO);
-        rightClaw.setPosition(MID_SERVO);
+//        leftClaw.setPosition(MID_SERVO);
+//        rightClaw.setPosition(MID_SERVO);
 
-        // Set motor directions for arms
-        leftArm.setDirection(DcMotor.Direction.FORWARD);
-        rightArm.setDirection(DcMotor.Direction.FORWARD);
+        leftArm.setDirection(DcMotor.Direction.REVERSE);
+        rightArm.setDirection(DcMotor.Direction.REVERSE );
 
-        // Optional: If encoders are connected, set them to run using encoders for greater accuracy
-        // leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        // rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Optional: Telemetry code can be added here if you want to track hardware status
-        // telemetry.addData(">", "Hardware Initialized");
-        // myOpMode.telemetry.update();
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+        imu.initialize(parameters);
     }
 
-    /**
-     * Calculates the left/right motor powers required to achieve the requested
-     * robot motions: Drive (Axial motion) and Turn (Yaw motion).
-     * Then sends these power levels to the motors.
-     *
-     * @param Drive Fwd/Rev driving power (-1.0 to 1.0) +ve is forward
-     * @param Turn  Right/Left turning power (-1.0 to 1.0) +ve is CW
-     */
-    public void driveRobot(double Drive, double Turn) {
-        // Combine drive and turn for blended motion.
-        double left = Drive + Turn;
-        double right = Drive - Turn;
+    public void drive(double x, double y, double theta) {
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        // Scale the values so neither exceed +/- 1.0
-        double max = Math.max(Math.abs(left), Math.abs(right));
-        if (max > 1.0) {
-            left /= max;
-            right /= max;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
+        double leftFrontPower = (y + x + theta) / denominator;
+        double leftBackPower = (y - x + theta) / denominator;
+        double rightFrontPower = (y - x - theta) / denominator;
+        double rightBackPower = (y + x - theta) / denominator;
+
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
+
+        telemetry.addData("leftFrontPower", leftFrontPower);
+        telemetry.addData("leftBackPower", leftBackPower);
+        telemetry.addData("rightFrontPower", rightFrontPower);
+        telemetry.addData("rightBackPower", rightBackPower);
+        telemetry.update();
+    }
+
+    public void drive_encoders(double x, double y, double speed, double timeout) {
+        double leftFrontDistance = (y + x);
+        double leftBackDistance = (y - x);
+        double rightFrontDistance = (y - x);
+        double rightBackDistance = (y + x);
+
+        leftFront.setTargetPosition((int) (leftFrontDistance*COUNTS_PER_INCH) + leftFront.getCurrentPosition());
+        leftBack.setTargetPosition((int) (leftBackDistance*COUNTS_PER_INCH) + leftBack.getCurrentPosition());
+        rightFront.setTargetPosition((int) (rightFrontDistance*COUNTS_PER_INCH) + rightFront.getCurrentPosition());
+        rightBack.setTargetPosition((int) (rightBackDistance*COUNTS_PER_INCH) + rightBack.getCurrentPosition());
+
+        telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
+        telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
+        telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
+        telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
+        telemetry.update();
+
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        runtime.reset();
+
+        while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
+                && runtime.seconds() < timeout
+                && myOpMode.opModeIsActive()) {
+            leftFront.setPower(speed);
+            leftBack.setPower(speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
+
+            telemetry.addData("leftFrontPower", leftFront.getPower());
+            telemetry.addData("leftBackPower", leftBack.getPower());
+            telemetry.addData("rightFrontPower", rightFront.getPower());
+            telemetry.addData("rightBackPower", rightBack.getPower());
+            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+            telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
+            telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
+            telemetry.update();
         }
 
-        // Use existing function to drive both wheels.
-        setDrivePower(left, right);
+        stopDrive();
+
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+        telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
+        telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
+        telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
+        telemetry.update();
     }
 
-    /**
-     * Pass the requested wheel motor powers to the appropriate hardware drive motors.
-     *
-     * @param leftWheel  Fwd/Rev driving power (-1.0 to 1.0) +ve is forward
-     * @param rightWheel Fwd/Rev driving power (-1.0 to 1.0) +ve is forward
-     */
-    public void setDrivePower(double leftWheel, double rightWheel) {
-        // Output the values to the motor drives.
-        leftFront.setPower(leftWheel);
-        rightFront.setPower(rightWheel);
-        leftBack.setPower(leftWheel);
-        rightBack.setPower(rightWheel);
+    public void rotate_encoders(double theta, double speed, double timeout) {
+        double radians = Math.toRadians(theta);
+        double arcLength = (ROBOT_WIDTH_INCHES / 2.0) * radians;
+
+        // Convert arc length to encoder counts
+        int targetPositionCounts = (int) (arcLength * COUNTS_PER_INCH);
+
+        // Set target positions for rotating the robot base
+        // Left side moves forward and right side moves backward for a counter-clockwise rotation
+        leftFront.setTargetPosition(leftFront.getCurrentPosition() + targetPositionCounts);
+        leftBack.setTargetPosition(leftBack.getCurrentPosition() + targetPositionCounts);
+        rightFront.setTargetPosition(rightFront.getCurrentPosition() - targetPositionCounts);
+        rightBack.setTargetPosition(rightBack.getCurrentPosition() - targetPositionCounts);
+
+        // Set motors to run to position mode
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        runtime.reset();
+
+        // Set motor power to initiate the rotation
+        leftFront.setPower(speed);
+        leftBack.setPower(speed);
+        rightFront.setPower(speed);
+        rightBack.setPower(speed);
+
+        // Loop until rotation completes or timeout is reached
+        while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
+                && runtime.seconds() < timeout
+                && myOpMode.opModeIsActive()) {
+            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+            telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
+            telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
+            telemetry.update();
+        }
+
+        // Stop the motors after rotation completes
+        stopDrive();
+
+        // Reset motors to run without encoder mode for normal operation
+        leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    /**
-     * Send the two hand-servos to opposing (mirrored) positions, based on the passed offset.
-     *
-     * @param offset The offset to apply to the servo positions
-     */
-    public void setHandPositions(double offset) {
-        offset = Range.clip(offset, -0.5, 0.5); // Clamp the offset to prevent out-of-bounds values
-        leftClaw.setPosition(MID_SERVO + offset);
-        rightClaw.setPosition(MID_SERVO - offset);
+
+    public void setArmPower(double power) {
+        leftArm.setPower(power);
+        rightArm.setPower(power);
+    }
+
+    public void setClawPosition(double position) {
+        leftClaw.setPosition(position);
+        rightClaw.setPosition(position);
+    }
+
+    public void setDrivePower(double leftFrontPower, double leftBackPower, double rightFrontPower, double rightBackPower) {
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
+    }
+
+    public void stopDrive() {
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
+    }
+
+    public void stopArm() {
+        leftArm.setPower(0);
+        rightArm.setPower(0);
+    }
+
+    public void stopClaw() {
+        leftClaw.setPosition(MID_SERVO);
+        rightClaw.setPosition(MID_SERVO);
+    }
+
+    public void stopAll() {
+        stopDrive();
+        stopArm();
+        stopClaw();
     }
 }
