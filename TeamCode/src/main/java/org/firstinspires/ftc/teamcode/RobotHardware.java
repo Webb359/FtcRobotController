@@ -136,7 +136,7 @@ public class RobotHardware {
             telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-            telemetry.update();
+
         }
 
         stopDrive();
@@ -189,7 +189,7 @@ public class RobotHardware {
             telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-            telemetry.update();
+
         }
 
         // Stop the motors after rotation completes
