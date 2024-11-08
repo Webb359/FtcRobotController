@@ -93,7 +93,7 @@ public class RobotHardware {
         telemetry.addData("leftBackPower", leftBackPower);
         telemetry.addData("rightFrontPower", rightFrontPower);
         telemetry.addData("rightBackPower", rightBackPower);
-        telemetry.update();
+        
     }
 
     public void drive_encoders(double x, double y, double speed, double timeout) {
@@ -111,9 +111,9 @@ public class RobotHardware {
         telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
         telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
         telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
-        telemetry.update();
+        
 
-        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftFront .setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -150,7 +150,7 @@ public class RobotHardware {
         telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
         telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
         telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-        telemetry.update();
+        
     }
 
     public void rotate_encoders(double theta, double speed, double timeout) {
