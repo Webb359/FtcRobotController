@@ -18,6 +18,13 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
         telemetry.update();
         robot.drive_encoders(0, 100, 48, 5);
 
-
+/*
+    drive: forward
+    pick up thing
+    turn left
+    forward
+    score
+    turn back
+ */
     }
 }
