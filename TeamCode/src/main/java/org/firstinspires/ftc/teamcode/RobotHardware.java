@@ -32,7 +32,7 @@ public class RobotHardware {
     static final double WHEEL_DIAMETER_INCHES = 4.0;    // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    static final double ROBOT_WIDTH_INCHES = 18.0;       // Distance between left and right wheels
+    static final double ROBOT_WIDTH_INCHES = 11;       // Distance between left and right wheels
 
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
@@ -59,7 +59,7 @@ public class RobotHardware {
 //        rightClaw.setPosition(MID_SERVO);
 
         leftArm.setDirection(DcMotor.Direction.REVERSE);
-        rightArm.setDirection(DcMotor.Direction.REVERSE );
+        rightArm.setDirection(DcMotor.Direction.REVERSE);
 
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
