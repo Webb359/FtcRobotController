@@ -16,7 +16,7 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
         waitForStart();
         telemetry.addData("Status", "Running");
         telemetry.update();
-        robot.drive_encoders(0, 100, 48, 5);
+        robot.drive_encoders(0, 20, 48, 5);
 
 
     }
