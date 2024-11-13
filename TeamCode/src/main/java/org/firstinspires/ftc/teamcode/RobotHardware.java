@@ -64,6 +64,11 @@ public class RobotHardware {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        // Set the encoders for arm to zero
+        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Set the IMU parameters for the robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
@@ -95,32 +100,39 @@ public class RobotHardware {
     }
 
     public void drive_encoders(double x, double y, double speed, double timeout) {
-        double leftFrontDistance = (y + x);
-        double leftBackDistance = (y - x);
-        double rightFrontDistance = (y - x);
-        double rightBackDistance = (y + x);
+        // Amplification factor for lateral movement due to mecanum wheel rollers (45-degree angle)
+        final double LATERAL_AMPLIFICATION_FACTOR = 1.4;
 
-        leftFront.setTargetPosition((int) (leftFrontDistance*COUNTS_PER_INCH) + leftFront.getCurrentPosition());
-        leftBack.setTargetPosition((int) (leftBackDistance*COUNTS_PER_INCH) + leftBack.getCurrentPosition());
-        rightFront.setTargetPosition((int) (rightFrontDistance*COUNTS_PER_INCH) + rightFront.getCurrentPosition());
-        rightBack.setTargetPosition((int) (rightBackDistance*COUNTS_PER_INCH) + rightBack.getCurrentPosition());
+        // Calculate distances accounting for forward (y) and amplified lateral (x) motion
+        double leftFrontDistance = (y * COUNTS_PER_INCH) + (x * COUNTS_PER_INCH * LATERAL_AMPLIFICATION_FACTOR);
+        double leftBackDistance = (y * COUNTS_PER_INCH) - (x * COUNTS_PER_INCH * LATERAL_AMPLIFICATION_FACTOR);
+        double rightFrontDistance = (y * COUNTS_PER_INCH) - (x * COUNTS_PER_INCH * LATERAL_AMPLIFICATION_FACTOR);
+        double rightBackDistance = (y * COUNTS_PER_INCH) + (x * COUNTS_PER_INCH * LATERAL_AMPLIFICATION_FACTOR);
+
+        // Set target positions for each motor
+        leftFront.setTargetPosition((int) leftFrontDistance + leftFront.getCurrentPosition());
+        leftBack.setTargetPosition((int) leftBackDistance + leftBack.getCurrentPosition());
+        rightFront.setTargetPosition((int) rightFrontDistance + rightFront.getCurrentPosition());
+        rightBack.setTargetPosition((int) rightBackDistance + rightBack.getCurrentPosition());
 
         telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
         telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
         telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
         telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
-        
 
-        leftFront .setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // Set motors to run to target position
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         runtime.reset();
 
+        // Run the motors until they reach the target or timeout occurs
         while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
                 && runtime.seconds() < timeout
                 && myOpMode.opModeIsActive()) {
+
             leftFront.setPower(speed);
             leftBack.setPower(speed);
             rightFront.setPower(speed);
@@ -134,11 +146,11 @@ public class RobotHardware {
             telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-
         }
 
         stopDrive();
 
+        // Set motors to run without encoder after finishing the move
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -148,7 +160,6 @@ public class RobotHardware {
         telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
         telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
         telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-        
     }
 
     public void rotate_encoders(double theta, double speed, double timeout) {

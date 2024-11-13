@@ -30,6 +30,8 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             double rotate = gamepad1.right_stick_x * 0.5;
             robot.drive(strafe, drive, rotate);
 
+            telemetry.addData("Arm Right Encoder Pos", robot.rightArm.getCurrentPosition());
+            telemetry.addData("Arm Left Encoder Pos", robot.leftArm.getCurrentPosition());
             telemetry.addData("Status", "Running");
             telemetry.update();
         }
