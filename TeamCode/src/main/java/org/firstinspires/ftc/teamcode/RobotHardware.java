@@ -53,7 +53,7 @@ public class RobotHardware {
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.REVERSE);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
 
 //        leftClaw.setPosition(MID_SERVO);
 //        rightClaw.setPosition(MID_SERVO);
