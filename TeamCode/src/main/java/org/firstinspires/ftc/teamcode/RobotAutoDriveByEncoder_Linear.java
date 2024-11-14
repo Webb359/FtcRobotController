@@ -18,13 +18,13 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
         waitForStart();
         telemetry.addData("Status", "Running");
         telemetry.update();
-        robot.drive_encoders(0, 27, 48, 5);
+        robot.drive_encoders(0, 27, 10, 5);
         // move arm to pick up thing
-        robot.drive_encoders(0, 105, 48, 5);
-        robot.rotate_encoders(90, 48, 5);
+        robot.drive_encoders(0, 105, 10, 5);
+        robot.rotate_encoders(90, 10, 5);
         // move arm to score
-        robot.drive_encoders(0, 15.5, 48, 5);
-        robot.rotate_encoders(-90, 48, 5);
+        robot.drive_encoders(0, 15.5, 10, 5);
+        robot.rotate_encoders(-90, 10, 5);
         // move arm to place thing
         runtime.reset();
 
@@ -35,7 +35,7 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
             robot.setArmPower(-30);
         }
         robot.setArmPower(0);
-        robot.drive_encoders(0, -10, 48, 5);
+        robot.drive_encoders(0, -10, 10, 5);
         robot.stopDrive();
 /*
     drive: (inches)
