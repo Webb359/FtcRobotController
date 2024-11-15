@@ -199,10 +199,11 @@ public class RobotHardware {
         rightBack.setPower(speed);
 
         // Loop until rotation completes or timeout is reached
-        while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
+        while ((leftFront.isBusy() || leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy())
                 && runtime.seconds() < timeout
                 && myOpMode.opModeIsActive()) {
-            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+
+        telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
             telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
