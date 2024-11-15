@@ -8,7 +8,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class RobotHardware {
@@ -19,8 +20,8 @@ public class RobotHardware {
     public DcMotor leftBack = null;
     public DcMotor rightFront = null;
     public DcMotor rightBack = null;
-    public DcMotor leftArm = null;
-    public DcMotor rightArm = null;
+    public DcMotorEx leftArm = null;
+    public DcMotorEx rightArm = null;
     public Servo leftClaw = null;
     public Servo rightClaw = null;
 
@@ -45,8 +46,8 @@ public class RobotHardware {
         leftBack = hardwareMap.get(DcMotor.class, "left_back");
         rightFront = hardwareMap.get(DcMotor.class, "right_front");
         rightBack = hardwareMap.get(DcMotor.class, "right_back");
-        leftArm = hardwareMap.get(DcMotor.class, "left_arm");
-        rightArm = hardwareMap.get(DcMotor.class, "right_arm");
+        leftArm = hardwareMap.get(DcMotorEx.class, "left_arm");
+        rightArm = hardwareMap.get(DcMotorEx.class, "right_arm");
 //        leftClaw = hardwareMap.get(Servo.class, "left_hand");
 //        rightClaw = hardwareMap.get(Servo.class, "right_hand");
 
@@ -104,7 +105,6 @@ public class RobotHardware {
         telemetry.addData("leftBackPower", leftBackPower);
         telemetry.addData("rightFrontPower", rightFrontPower);
         telemetry.addData("rightBackPower", rightBackPower);
-        telemetry.update();
     }
 
     public void drive_encoders(double x, double y, double speed, double timeout) {
@@ -225,5 +225,13 @@ public class RobotHardware {
         leftBack.setPower(leftBackPower);
         rightFront.setPower(rightFrontPower);
         rightBack.setPower(rightBackPower);
+    }
+
+    public void setArmPower(double power){
+        double rpm=power*100;
+        double tickperrev=leftArm.getMotorType().getTicksPerRev();
+        double tickspersec=(rpm/60)*tickperrev;
+        leftArm.setVelocity(tickspersec);
+        rightArm.setVelocity(tickspersec);
     }
 }

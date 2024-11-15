@@ -18,9 +18,9 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
 
         while (opModeIsActive()) {
             if (gamepad1.right_bumper) {
-                robot.setArmPower(0.1);
+                robot.setArmPower(1.5);
             } else if (gamepad1.right_trigger > 0.3) {
-                robot.setArmPower(-0.1);
+                robot.setArmPower(1.5);
             } else {
                 robot.setArmPower(0);
             }
