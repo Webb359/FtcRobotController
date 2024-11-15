@@ -16,10 +16,10 @@ public class RobotHardware {
     private Telemetry telemetry;
     private LinearOpMode myOpMode = null;
     public IMU imu = null;
-    public DcMotor leftFront = null;
-    public DcMotor leftBack = null;
-    public DcMotor rightFront = null;
-    public DcMotor rightBack = null;
+    public DcMotorEx leftFront = null;
+    public DcMotorEx leftBack = null;
+    public DcMotorEx rightFront = null;
+    public DcMotorEx rightBack = null;
     public DcMotorEx leftArm = null;
     public DcMotorEx rightArm = null;
     public Servo leftClaw = null;
@@ -42,10 +42,10 @@ public class RobotHardware {
 
     public void init(HardwareMap hardwareMap) {
         imu = hardwareMap.get(IMU.class, "imu");
-        leftFront = hardwareMap.get(DcMotor.class, "left_front");
-        leftBack = hardwareMap.get(DcMotor.class, "left_back");
-        rightFront = hardwareMap.get(DcMotor.class, "right_front");
-        rightBack = hardwareMap.get(DcMotor.class, "right_back");
+        leftFront = hardwareMap.get(DcMotorEx.class, "left_front");
+        leftBack = hardwareMap.get(DcMotorEx.class, "left_back");
+        rightFront = hardwareMap.get(DcMotorEx.class, "right_front");
+        rightBack = hardwareMap.get(DcMotorEx.class, "right_back");
         leftArm = hardwareMap.get(DcMotorEx.class, "left_arm");
         rightArm = hardwareMap.get(DcMotorEx.class, "right_arm");
 //        leftClaw = hardwareMap.get(Servo.class, "left_hand");
