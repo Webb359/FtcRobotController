@@ -229,9 +229,11 @@ public class RobotHardware {
 
     public void setArmPower(double power){
         double rpm=power*100;
-        double tickperrev=leftArm.getMotorType().getTicksPerRev();
-        double tickspersec=(rpm/60)*tickperrev;
-        leftArm.setVelocity(tickspersec);
-        rightArm.setVelocity(tickspersec);
+        double tickperrevl=leftArm.getMotorType().getTicksPerRev();
+        double tickspersecl=(rpm/60)*tickperrevl;
+        double tickperrevr=rightArm.getMotorType().getTicksPerRev();
+        double tickspersecr=(rpm/60)*tickperrevr;
+        leftArm.setVelocity(tickspersecl);
+        rightArm.setVelocity(tickspersecr);
     }
 }
