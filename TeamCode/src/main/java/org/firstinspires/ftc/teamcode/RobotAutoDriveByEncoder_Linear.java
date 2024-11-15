@@ -18,25 +18,27 @@ public class RobotAutoDriveByEncoder_Linear extends LinearOpMode {
         waitForStart();
         telemetry.addData("Status", "Running");
         telemetry.update();
-        robot.drive_encoders(0, 27, 10, 5);
-        // move arm to pick up thing
-        robot.drive_encoders(0, 105, 10, 5);
-        robot.rotate_encoders(90, 10, 5);
-        // move arm to score
-        robot.drive_encoders(0, 15.5, 10, 5);
-        robot.rotate_encoders(-90, 10, 5);
-        // move arm to place thing
-        runtime.reset();
+        robot.drive_encoders(0, .1, 5, 5);
+//        // move arm to pick up thing
+//        robot.rotate_encoders(90, 5, 5);
+//        robot.drive_encoders(0, 105, 5, 5);
+//        // move arm to score
+//        robot.rotate_encoders(90, 5, 5);
+//        robot.drive_encoders(0, 15.5, 5, 5);
+//        // move arm to place thing
+//        runtime.reset();
 
-        while (opModeIsActive() && runtime.seconds() < 1) {
-            robot.setArmPower(50);
-        }
-        while (opModeIsActive() && runtime.seconds() < 2) {
-            robot.setArmPower(-30);
-        }
-        robot.setArmPower(0);
-        robot.drive_encoders(0, -10, 10, 5);
-        robot.stopDrive();
+        //robot.drive_encoders(11.5,0,15,5);  move to the right -> repeat
+
+//        while (opModeIsActive() && runtime.seconds() < 1) {
+//            robot.setArmPower(50);
+//        }
+//        while (opModeIsActive() && runtime.seconds() < 2) {
+//            robot.setArmPower(-30);
+//        }
+//        robot.setArmPower(0);
+//        robot.drive_encoders(0, -10, 15, 5);
+//        robot.stopDrive();
 /*
     drive: (inches)
     forward: 27

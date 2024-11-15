@@ -141,10 +141,10 @@ public class RobotHardware {
                 && runtime.seconds() < timeout
                 && myOpMode.opModeIsActive()) {
 
-            leftFront.setPower(speed);
-            leftBack.setPower(speed);
-            rightFront.setPower(speed);
-            rightBack.setPower(speed);
+            leftFront.setPower(speed/100);
+            leftBack.setPower(speed/100);
+            rightFront.setPower(speed/100);
+            rightBack.setPower(speed/100);
 
             telemetry.addData("leftFrontPower", leftFront.getPower());
             telemetry.addData("leftBackPower", leftBack.getPower());
