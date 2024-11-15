@@ -227,13 +227,36 @@ public class RobotHardware {
         rightBack.setPower(rightBackPower);
     }
 
-    public void setArmPower(double power){
-        double rpm=power*100;
-        double tickperrevl=leftArm.getMotorType().getTicksPerRev();
-        double tickspersecl=(rpm/60)*tickperrevl;
-        double tickperrevr=rightArm.getMotorType().getTicksPerRev();
-        double tickspersecr=(rpm/60)*tickperrevr;
-        leftArm.setVelocity(tickspersecl);
-        rightArm.setVelocity(tickspersecr);
+    public void setArmPower(double power) {
+        if (power == 0) {
+            // When power is 0, set both arms to run to position mode
+            int leftPos = leftArm.getCurrentPosition();
+            int rightPos = rightArm.getCurrentPosition();
+            // Use the average position as target
+            int targetPos = (leftPos + rightPos) / 2;
+            
+            leftArm.setTargetPosition(targetPos);
+            rightArm.setTargetPosition(targetPos);
+            
+            leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            
+            // Set a small power to maintain position
+            leftArm.setPower(0.1);
+            rightArm.setPower(0.1);
+        } else {
+            // Normal velocity control for non-zero power
+            double rpm = power * 100;
+            double tickperrevl = leftArm.getMotorType().getTicksPerRev();
+            double tickspersecl = (rpm/60) * tickperrevl;
+            double tickperrevr = rightArm.getMotorType().getTicksPerRev();
+            double tickspersecr = (rpm/60) * tickperrevr;
+            
+            leftArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            
+            leftArm.setVelocity(tickspersecl);
+            rightArm.setVelocity(tickspersecr);
+        }
     }
 }
