@@ -199,16 +199,28 @@ public class RobotHardware {
         rightBack.setPower(speed);
 
         // Loop until rotation completes or timeout is reached
+        // In drive_encoders:
         while ((leftFront.isBusy() || leftBack.isBusy() || rightFront.isBusy() || rightBack.isBusy())
                 && runtime.seconds() < timeout
                 && myOpMode.opModeIsActive()) {
+            leftFront.setPower(speed); // Adjusted based on speed requirements
+            leftBack.setPower(speed);
+            rightFront.setPower(speed);
+            rightBack.setPower(speed);
 
-        telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
+            telemetry.addData("leftFrontPower", leftFront.getPower());
+            telemetry.addData("leftBackPower", leftBack.getPower());
+            telemetry.addData("rightFrontPower", rightFront.getPower());
+            telemetry.addData("rightBackPower", rightBack.getPower());
+            telemetry.addData("leftFrontPosition", leftFront.getCurrentPosition());
             telemetry.addData("leftBackPosition", leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", rightBack.getCurrentPosition());
-
+            telemetry.update();
         }
+
+// In rotate_encoders, use the same telemetry updates within the loop
+
 
         // Stop the motors after rotation completes
         stopDrive();
