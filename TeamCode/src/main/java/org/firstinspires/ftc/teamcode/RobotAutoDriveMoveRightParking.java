@@ -17,7 +17,7 @@ public class RobotAutoDriveMoveRightParking extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        robot.driveTimed(50, 0, 0, 1000);
+        robot.driveTimed(0.5, 0, 0, 1000);
         robot.stopDrive();
     }
 }
