@@ -259,4 +259,40 @@ public class RobotHardware {
             rightArm.setVelocity(tickspersecr + correction);
         }
     }
+    public void driveTimed(double x, double y, double theta, long timeMs) {
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
+        double leftFrontPower = (y + x + theta) / denominator ;
+        double leftBackPower = (y - x + theta) / denominator;
+        double rightFrontPower = (y - x - theta) / denominator;
+        double rightBackPower = (y + x - theta) / denominator;
+
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
+
+        double numerator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
+        double leftFrontPowerActual = (y + x + theta) / numerator;
+        double leftBackPowerActual = (y - x + theta) / numerator;
+        double rightFrontPowerActual = (y - x - theta) / numerator;
+        double rightBackPowerActual = (y + x - theta) / numerator;
+
+        telemetry.addData("leftFrontPower", leftFrontPowerActual);
+        telemetry.addData("leftBackPower", leftBackPowerActual);
+        telemetry.addData("rightFrontPower", rightFrontPowerActual);
+        telemetry.addData("rightBackPower", rightBackPowerActual);
+        telemetry.addData("leftFrontPower", leftFront.getPower());
+        telemetry.addData("leftBackPower", leftBack.getPower());
+        telemetry.addData("rightFrontPower", rightFront.getPower());
+        telemetry.addData("rightBackPower", rightBack.getPower());
+        telemetry.update();
+
+        runtime.reset();
+        while (runtime.milliseconds() < timeMs && myOpMode.opModeIsActive()) {
+            telemetry.addData("Time Remaining", timeMs - runtime.milliseconds());
+            telemetry.update();
+        }
+
+        stopDrive();
+    }
 }
