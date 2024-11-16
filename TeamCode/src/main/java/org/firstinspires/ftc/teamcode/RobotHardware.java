@@ -255,8 +255,12 @@ public class RobotHardware {
             leftArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             
-            leftArm.setVelocity(tickspersecl);
-            rightArm.setVelocity(tickspersecr);
+            // Apply small corrections if arms get out of sync
+            double positionDiff = leftArm.getCurrentPosition() - rightArm.getCurrentPosition();
+            double correction = positionDiff * 0.01; // Small correction factor
+            
+            leftArm.setVelocity(tickspersecl - correction);
+            rightArm.setVelocity(tickspersecr + correction);
         }
     }
 }
