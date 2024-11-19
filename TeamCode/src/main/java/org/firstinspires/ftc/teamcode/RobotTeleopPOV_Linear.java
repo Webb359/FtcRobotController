@@ -33,6 +33,10 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
 
             telemetry.addData("Arm Right Encoder Pos", robot.rightArm.getCurrentPosition());
             telemetry.addData("Arm Left Encoder Pos", robot.leftArm.getCurrentPosition());
+            telemetry.addData("leftFrontPosition", robot.leftFront.getCurrentPosition());
+            telemetry.addData("leftBackPosition", robot.leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontPosition", robot.rightFront.getCurrentPosition());
+            telemetry.addData("rightBackPosition", robot.rightBack.getCurrentPosition());
             telemetry.addData("Status", "Running");
             telemetry.update();
         }
