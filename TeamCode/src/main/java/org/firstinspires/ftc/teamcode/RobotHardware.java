@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import com.qualcomm.robotcore.util.Range;
 
 public class RobotHardware {
     private Telemetry telemetry;
@@ -34,6 +37,9 @@ public class RobotHardware {
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double ROBOT_WIDTH_INCHES = 11;       // Distance between left and right wheels
+
+    static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable.
+    static final double     P_DRIVE_GAIN           = 0.03;     // Larger is more responsive, but also less stable.
 
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
@@ -80,6 +86,66 @@ public class RobotHardware {
         imu.initialize(parameters);
     }
 
+    public void driveStraightEncoderGyro(double maxDriveSpeed,double y, double timeout,double heading){
+        double leftFrontDistance = (y * COUNTS_PER_INCH);
+        double leftBackDistance = (y * COUNTS_PER_INCH);
+        double rightFrontDistance = (y * COUNTS_PER_INCH);
+        double rightBackDistance = (y * COUNTS_PER_INCH);
+
+        leftFront.setTargetPosition((int) leftFrontDistance + leftFront.getCurrentPosition());
+        leftBack.setTargetPosition((int) leftBackDistance + leftBack.getCurrentPosition());
+        rightFront.setTargetPosition((int) rightFrontDistance + rightFront.getCurrentPosition());
+        rightBack.setTargetPosition((int) rightBackDistance + rightBack.getCurrentPosition());
+
+        telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
+        telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
+        telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
+        telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
+
+        // Set motors to run to target position
+        leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        runtime.reset();
+        double turnSpeed;
+        double leftspeed;
+        double rightspeed;
+        while ((leftFront.isBusy() && leftBack.isBusy() && rightFront.isBusy() && rightBack.isBusy())
+                && runtime.seconds() < timeout
+                && myOpMode.opModeIsActive()) {
+            double currentheading=imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            double headingError;
+            headingError = heading - currentheading;
+            while (headingError > 180)  headingError -= 360;
+            while (headingError <= -180) headingError += 360;
+            turnSpeed=Range.clip(headingError * P_DRIVE_GAIN, -1, 1);
+
+            if (y < 0) {
+                turnSpeed *= -1.0;
+            }
+            leftspeed=maxDriveSpeed-turnSpeed;
+            rightspeed=maxDriveSpeed+turnSpeed;
+            double max = Math.max(Math.abs(leftspeed), Math.abs(rightspeed));
+            if (max > maxDriveSpeed)
+            {
+                leftspeed /= max;
+                rightspeed /= max;
+            }
+
+            leftFront.setPower(leftspeed);
+            leftBack.setPower(leftspeed);
+            rightFront.setPower(rightspeed);
+            rightBack.setPower(rightspeed);
+        }
+
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     public void drive(double x, double y, double theta) {
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -123,7 +189,6 @@ public class RobotHardware {
         telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
         telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
         telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
-        telemetry.update();
 
         // Set motors to run to target position
         leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
