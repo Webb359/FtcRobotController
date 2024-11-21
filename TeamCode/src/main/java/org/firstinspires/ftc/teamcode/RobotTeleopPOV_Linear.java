@@ -38,6 +38,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             telemetry.addData("rightFrontPosition", robot.rightFront.getCurrentPosition());
             telemetry.addData("rightBackPosition", robot.rightBack.getCurrentPosition());
             telemetry.addData("Status", "Running");
+            telemetry.addData("revmotor",robot.rightBack.getMotorType().getTicksPerRev());
             telemetry.update();
         }
     }
