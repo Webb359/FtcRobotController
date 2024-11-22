@@ -21,6 +21,6 @@ public class RobotAutoDriveByEncoderAndGyro extends LinearOpMode {
         telemetry.addData("Status", "Running");
         telemetry.update();
 
-        robot.driveStraightEncoderGyro(30,3,3,0);
+        robot.driveStraightEncoderGyro(30,3,3);
     }
 }
