@@ -32,7 +32,7 @@ public class RobotHardware {
     public static final double MID_SERVO = 0.5;
 
     static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: Rev HD Hex Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 1.0;     // No External Gearing.
+    static final double DRIVE_GEAR_REDUCTION = 0.05;     // No External Gearing.
     static final double WHEEL_DIAMETER_INCHES = 6.0;    // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
