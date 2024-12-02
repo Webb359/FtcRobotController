@@ -87,7 +87,54 @@ public class RobotHardware {
     }
     public void rotate_gyro(double theta,double speed,double timeout){
         double heading=imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-
+        double targetHeading = heading + theta;
+        
+        // Normalize target heading to be within -180 to 180 degrees
+        while (targetHeading > 180) targetHeading -= 360;
+        while (targetHeading <= -180) targetHeading += 360;
+        
+        runtime.reset();
+        
+        // Set motors to run using encoders for better speed control
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        
+        while (runtime.seconds() < timeout && myOpMode.opModeIsActive()) {
+            double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+            double headingError = targetHeading - currentHeading;
+            
+            // Normalize heading error to be within -180 to 180 degrees
+            while (headingError > 180) headingError -= 360;
+            while (headingError <= -180) headingError += 360;
+            
+            // Calculate turn power using proportional control
+            double turnSpeed = Range.clip(headingError * P_TURN_GAIN, -speed, speed);
+            
+            // Stop if we're close enough to target heading
+            if (Math.abs(headingError) < 2.0) {
+                break;
+            }
+            
+            // Apply motor powers
+            leftFront.setPower(turnSpeed);
+            leftBack.setPower(turnSpeed);
+            rightFront.setPower(-turnSpeed);
+            rightBack.setPower(-turnSpeed);
+            
+            telemetry.addData("Target Heading", targetHeading);
+            telemetry.addData("Current Heading", currentHeading);
+            telemetry.addData("Heading Error", headingError);
+            telemetry.addData("Turn Speed", turnSpeed);
+            telemetry.update();
+        }
+        
+        // Stop all motors
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
     }
     public void driveStraightEncoderGyro(double maxDriveSpeed,double y, double timeout){
 
