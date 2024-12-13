@@ -3,13 +3,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
@@ -32,14 +31,16 @@ public class RobotHardware {
     public static final double MID_SERVO = 0.5;
 
     static final double COUNTS_PER_MOTOR_REV = 1440;    // eg: Rev HD Hex Motor Encoder
-    static final double DRIVE_GEAR_REDUCTION = 0.05;     // No External Gearing.
-    static final double WHEEL_DIAMETER_INCHES = 6.0;    // For figuring circumference
+    static final double DRIVE_GEAR_REDUCTION = 1;     // No External Gearing.
+    static final double WHEEL_DIAMETER_INCHES = 3.0;    // For figuring circumference
     static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double ROBOT_WIDTH_INCHES = 11;       // Distance between left and right wheels
 
     static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable.
     static final double     P_DRIVE_GAIN           = 0.03;     // Larger is more responsive, but also less stable.
+
+    double targetHeading = 0;
 
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
@@ -84,6 +85,8 @@ public class RobotHardware {
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
                 RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
         imu.initialize(parameters);
+
+        targetHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
     }
     public void rotate_gyro(double theta,double speed,double timeout){
         double heading=imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
@@ -136,7 +139,7 @@ public class RobotHardware {
         rightFront.setPower(0);
         rightBack.setPower(0);
     }
-    public void driveStraightEncoderGyro(double maxDriveSpeed,double y, double timeout){
+    public void driveStraightEncoderGyro(double maxDriveSpeed, double y, double timeout){
 
         double heading=imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
@@ -191,61 +194,107 @@ public class RobotHardware {
             leftBack.setPower(leftspeed);
             rightFront.setPower(rightspeed);
             rightBack.setPower(rightspeed);
+
+            telemetry.addData("left speed",leftspeed);
+            telemetry.addData("right speed",rightspeed);
+            telemetry.addData("leftFrontTarget", leftFront.getTargetPosition());
+            telemetry.addData("leftBackTarget", leftBack.getTargetPosition());
+            telemetry.addData("rightFrontTarget", rightFront.getTargetPosition());
+            telemetry.addData("rightBackTarget", rightBack.getTargetPosition());
+            telemetry.addData("leftFrontCurrent", leftFront.getCurrentPosition());
+            telemetry.addData("leftBackCurrent", leftBack.getCurrentPosition());
+            telemetry.addData("rightFrontCurrent", rightFront.getCurrentPosition());
+            telemetry.addData("rightBackCurrent", rightBack.getCurrentPosition());
+            telemetry.update();
+
         }
+
+        leftFront.setPower(0);
+        leftBack.setPower(0);
+        rightFront.setPower(0);
+        rightBack.setPower(0);
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);  
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
 
-    public void drive(double x, double y, double theta, int gyro) {
-        if (gyro==1){
-            double currentheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-            double headingError = -currentheading; // Correcting for gyro offset
+
+    }
+    public void drive_gyro(double x, double y, double theta){
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        double leftFrontPower=0;
+        double leftBackPower=0;
+        double rightFrontPower=0;
+        double rightBackPower=0;
+        double currentheading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        double headingError=0;
+        if (theta==0) {
+            headingError = currentheading - targetHeading; // Correcting for gyro offset
             while (headingError > 180) headingError -= 360;
             while (headingError <= -180) headingError += 360;
             double turnSpeed = Range.clip(headingError * P_DRIVE_GAIN, -1, 1);
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta + turnSpeed), 1);
-            double leftFrontPower = (y + x + (theta + turnSpeed)) / denominator;
-            double leftBackPower = (y - x + (theta + turnSpeed)) / denominator;
-            double rightFrontPower = (y - x - (theta + turnSpeed)) / denominator;
-            double rightBackPower = (y + x - (theta + turnSpeed)) / denominator;
-
-            leftFront.setPower(leftFrontPower);
-            leftBack.setPower(leftBackPower);
-            rightFront.setPower(rightFrontPower);
-            rightBack.setPower(rightBackPower);
-
-            telemetry.addData("Gyro Heading", currentheading);
-            telemetry.addData("Heading Error", headingError);
-            telemetry.addData("leftFrontPower", leftFrontPower);
-            telemetry.addData("leftBackPower", leftBackPower);
-            telemetry.addData("rightFrontPower", rightFrontPower);
-            telemetry.addData("rightBackPower", rightBackPower);
+            leftFrontPower = (y + x + (turnSpeed)) / denominator;
+            leftBackPower = (y - x + (turnSpeed)) / denominator;
+            rightFrontPower = (y - x - (turnSpeed)) / denominator;
+            rightBackPower = (y + x - (turnSpeed)) / denominator;
+            telemetry.addData("gyro status","on");
         }
         else{
-            leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            double denominator = Math.max(Math.abs(y) + Math.abs(x), 1);
+            leftFrontPower = (y + x + theta) / denominator;
+            leftBackPower = (y - x + theta) / denominator;
+            rightFrontPower = (y - x - theta) / denominator;
+            rightBackPower = (y + x- theta) / denominator;
+            targetHeading=currentheading;
+        }
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
 
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
-            double leftFrontPower = (y + x + theta) / denominator;
-            double leftBackPower = (y - x + theta) / denominator;
-            double rightFrontPower = (y - x - theta) / denominator;
-            double rightBackPower = (y + x - theta) / denominator;
+        telemetry.addData("Gyro Heading", currentheading);
+        telemetry.addData("Target Heading", targetHeading);
+        telemetry.addData("Heading Error", headingError);
+        telemetry.addData("leftFrontPower", leftFrontPower);
+        telemetry.addData("leftBackPower", leftBackPower);
+        telemetry.addData("rightFrontPower", rightFrontPower);
+        telemetry.addData("rightBackPower", rightBackPower);
+    }
 
-            leftFront.setPower(leftFrontPower);
-            leftBack.setPower(leftBackPower);
-            rightFront.setPower(rightFrontPower);
-            rightBack.setPower(rightBackPower);
+    public void drive_power(double x, double y, double theta){
+        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-            telemetry.addData("leftFrontPower", leftFrontPower);
-            telemetry.addData("leftBackPower", leftBackPower);
-            telemetry.addData("rightFrontPower", rightFrontPower);
-            telemetry.addData("rightBackPower", rightBackPower);
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(theta), 1);
+        double leftFrontPower = (y + x + theta) / denominator;
+        double leftBackPower = (y - x + theta) / denominator;
+        double rightFrontPower = (y - x - theta) / denominator;
+        double rightBackPower = (y + x - theta) / denominator;
+
+        leftFront.setPower(leftFrontPower);
+        leftBack.setPower(leftBackPower);
+        rightFront.setPower(rightFrontPower);
+        rightBack.setPower(rightBackPower);
+
+        telemetry.addData("leftFrontPower", leftFrontPower);
+        telemetry.addData("leftBackPower", leftBackPower);
+        telemetry.addData("rightFrontPower", rightFrontPower);
+        telemetry.addData("rightBackPower", rightBackPower);
+    }
+    public void drive(double x, double y, double theta, int gyro) {
+        if (gyro==1){
+            drive_gyro(x,y,theta);
+        }
+        else{
+            drive_power(x,y,theta);
         }
        
     }
