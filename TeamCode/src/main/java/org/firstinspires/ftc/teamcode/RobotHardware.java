@@ -22,10 +22,8 @@ public class RobotHardware {
     public DcMotorEx leftBack = null;
     public DcMotorEx rightFront = null;
     public DcMotorEx rightBack = null;
-    public DcMotorEx leftArm = null;
-    public DcMotorEx rightArm = null;
-    public Servo leftClaw = null;
-    public Servo rightClaw = null;
+    public Servo Claw = null;
+    public DcMotorEx arm=null;
 
     private ElapsedTime runtime = new ElapsedTime();
     public static final double MID_SERVO = 0.5;
@@ -53,18 +51,14 @@ public class RobotHardware {
         leftBack = hardwareMap.get(DcMotorEx.class, "left_back");
         rightFront = hardwareMap.get(DcMotorEx.class, "right_front");
         rightBack = hardwareMap.get(DcMotorEx.class, "right_back");
-        leftArm = hardwareMap.get(DcMotorEx.class, "left_arm");
-        rightArm = hardwareMap.get(DcMotorEx.class, "right_arm");
-//        leftClaw = hardwareMap.get(Servo.class, "left_hand");
-//        rightClaw = hardwareMap.get(Servo.class, "right_hand");
+
+        Claw = hardwareMap.get(Servo.class, "claw");
+        arm=hardwareMap.get(DcMotorEx.class, "arm");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftBack.setDirection(DcMotor.Direction.REVERSE);
         rightBack.setDirection(DcMotor.Direction.REVERSE);
         rightFront.setDirection(DcMotor.Direction.FORWARD);
-
-//        leftClaw.setPosition(MID_SERVO);
-//        rightClaw.setPosition(MID_SERVO);
 
 
         leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -72,13 +66,7 @@ public class RobotHardware {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        // Set the encoders for arm to zero
-        leftArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightArm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        // Set the encoders for arm to on
-        leftArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Claw.setPosition(0.6);
 
         // Set the IMU parameters for the robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
@@ -299,6 +287,10 @@ public class RobotHardware {
        
     }
 
+    public void setArmPower(double p){
+        arm.setPower(p);
+    }
+
     public void stopDrive() {
         leftFront.setPower(0);
         leftBack.setPower(0);
@@ -313,42 +305,11 @@ public class RobotHardware {
         rightBack.setPower(rightBackPower);
     }
 
-    public void setArmPower(double power) {
-        if (power == 0) {
-            // When power is 0, set both arms to run to position mode
-            int leftPos = leftArm.getCurrentPosition();
-            int rightPos = rightArm.getCurrentPosition();
-            // Use the average position as target
-            int targetPos = (leftPos + rightPos) / 2;
-            
-            leftArm.setTargetPosition(targetPos);
-            rightArm.setTargetPosition(targetPos);
-            
-            leftArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            rightArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            
-            // Set a small power to maintain position
-            leftArm.setPower(0.1);
-            rightArm.setPower(0.1);
-        } else {
-            // Normal velocity control for non-zero power
-            double rpm = power * 100;
-            double tickperrevl = leftArm.getMotorType().getTicksPerRev();
-            double tickspersecl = (rpm/60) * tickperrevl;
-            double tickperrevr = rightArm.getMotorType().getTicksPerRev();
-            double tickspersecr = (rpm/60) * tickperrevr;
-            
-            leftArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            
-            // Apply small corrections if arms get out of sync
-            double positionDiff = leftArm.getCurrentPosition() - rightArm.getCurrentPosition();
-            double correction = positionDiff * 0.01; // Small correction factor
-            
-            leftArm.setVelocity(tickspersecl - correction);
-            rightArm.setVelocity(tickspersecr + correction);
-        }
+    public void moveClaw(double pos){
+        Claw.setPosition(pos);
     }
+
+
     public void driveTimed(double x, double y, double theta, long timeMs) {
         leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

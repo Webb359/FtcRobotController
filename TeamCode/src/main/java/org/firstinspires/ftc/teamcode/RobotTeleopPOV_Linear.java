@@ -17,21 +17,31 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
         telemetry.update();
 
         while (opModeIsActive()) {
-            if (gamepad1.right_bumper) {
-                robot.setArmPower(1);
-            } else if (gamepad1.right_trigger > 0.3) {
-                robot.setArmPower(-1);
-            } else {
-                robot.setArmPower(0);
+
+
+            if (gamepad1.right_bumper){
+                robot.setArmPower(0.5);
+            }
+            else if (gamepad1.right_trigger > 0.3){
+                robot.setArmPower(-0.5);
+            }
+            else{
+                robot.setArmPower(0.02);
             }
 
+            if (gamepad1.a){
+                robot.moveClaw(0.6);
+            }
+            else if (gamepad1.b){
+                robot.moveClaw(0.4);
+            }
+
+            
 
             double drive = -gamepad1.left_stick_y * 0.5;
             double strafe = gamepad1.left_stick_x * 0.5;
             double rotate = gamepad1.right_stick_x * 0.5;
             robot.drive(strafe, drive, rotate,0);
-            telemetry.addData("Arm Right Encoder Pos", robot.rightArm.getCurrentPosition());
-            telemetry.addData("Arm Left Encoder Pos", robot.leftArm.getCurrentPosition());
             telemetry.addData("leftFrontPosition", robot.leftFront.getCurrentPosition());
             telemetry.addData("leftBackPosition", robot.leftBack.getCurrentPosition());
             telemetry.addData("rightFrontPosition", robot.rightFront.getCurrentPosition());
