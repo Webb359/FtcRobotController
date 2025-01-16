@@ -40,6 +40,8 @@ public class RobotHardware {
 
     double targetHeading = 0;
 
+    public boolean clawOpen;
+
     public RobotHardware(LinearOpMode opMode) {
         myOpMode = opMode;
         telemetry = opMode.telemetry;
@@ -66,8 +68,8 @@ public class RobotHardware {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        Claw.setPosition(0.6);
-
+        Claw.setPosition(0.53);
+        clawOpen=true;
         // Set the IMU parameters for the robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -305,8 +307,15 @@ public class RobotHardware {
         rightBack.setPower(rightBackPower);
     }
 
-    public void moveClaw(double pos){
-        Claw.setPosition(pos);
+    public void moveClaw(){
+        if (clawOpen){
+            Claw.setPosition(0.44);
+            clawOpen=false;
+        }
+        else{
+            Claw.setPosition(0.53);
+            clawOpen=true;
+        }
     }
 
 

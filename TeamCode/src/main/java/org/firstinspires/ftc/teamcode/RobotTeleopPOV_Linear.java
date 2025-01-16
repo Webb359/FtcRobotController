@@ -15,7 +15,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
         waitForStart();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-
+        boolean gamepad1A_ispressed = false;
         while (opModeIsActive()) {
 
 
@@ -26,15 +26,20 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
                 robot.setArmPower(-0.5);
             }
             else{
-                robot.setArmPower(0.02);
+                robot.setArmPower(0.05);
             }
 
             if (gamepad1.a){
-                robot.moveClaw(0.6);
+                if (!gamepad1A_ispressed){
+                    robot.moveClaw();
+                    gamepad1A_ispressed = true;
+                }
             }
-            else if (gamepad1.b){
-                robot.moveClaw(0.4);
+            else if (gamepad1A_ispressed){
+                gamepad1A_ispressed = false;
             }
+
+
 
             
 
@@ -48,6 +53,7 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
             telemetry.addData("rightBackPosition", robot.rightBack.getCurrentPosition());
             telemetry.addData("Status", "Running");
             telemetry.addData("imu", robot.imu.getRobotYawPitchRollAngles().toString());
+            telemetry.addData("claw state",robot.clawOpen);
             telemetry.update();
         }
     }
