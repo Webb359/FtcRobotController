@@ -24,6 +24,10 @@ public class RobotHardware {
     public DcMotorEx rightBack = null;
     public Servo Claw = null;
     public DcMotorEx arm=null;
+    public Servo rightExtend;
+    public Servo leftExtend;
+    public Servo rightHand;
+    public Servo leftHand;
 
     private ElapsedTime runtime = new ElapsedTime();
     public static final double MID_SERVO = 0.5;
@@ -68,8 +72,18 @@ public class RobotHardware {
         rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        Claw.setPosition(0.53);
+        rightExtend = hardwareMap.get(Servo.class, "rightExtend");
+        leftExtend = hardwareMap.get(Servo.class, "leftExtend");
+        rightHand = hardwareMap.get(Servo.class, "rightHand");
+        leftHand = hardwareMap.get(Servo.class, "leftHand");
+
+        Claw.setPosition(0.55);
         clawOpen=true;
+
+        rightExtend.setPosition(0.3);
+        leftExtend.setPosition(0.7);
+        rightHand.setPosition(0.5);
+        leftHand.setPosition(0.5);
         // Set the IMU parameters for the robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -293,6 +307,16 @@ public class RobotHardware {
         arm.setPower(p);
     }
 
+    public void setExtend(double p){
+        rightExtend.setPosition(p);
+        leftExtend.setPosition(1-p);
+    }
+
+    public void setHand(double p){
+        rightHand.setPosition(p);
+        leftHand.setPosition(1-p);
+    }
+
     public void stopDrive() {
         leftFront.setPower(0);
         leftBack.setPower(0);
@@ -313,7 +337,7 @@ public class RobotHardware {
             clawOpen=false;
         }
         else{
-            Claw.setPosition(0.53);
+            Claw.setPosition(0.55);
             clawOpen=true;
         }
     }

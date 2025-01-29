@@ -19,11 +19,11 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
         while (opModeIsActive()) {
 
 
-            if (gamepad1.right_bumper){
-                robot.setArmPower(0.5);
+            if (gamepad1.right_trigger>0.1){
+                robot.setArmPower(gamepad1.right_trigger/3);
             }
-            else if (gamepad1.right_trigger > 0.3){
-                robot.setArmPower(-0.5);
+            else if (gamepad1.right_bumper){
+                robot.setArmPower(-0.2);
             }
             else{
                 robot.setArmPower(0.05);
@@ -39,13 +39,23 @@ public class RobotTeleopPOV_Linear extends LinearOpMode {
                 gamepad1A_ispressed = false;
             }
 
+            if(gamepad1.dpad_up&&robot.rightExtend.getPosition()<0.99){
+                robot.setExtend(robot.rightExtend.getPosition()+0.01);
+            }
+            else if(gamepad1.dpad_down&&robot.rightExtend.getPosition()>0.01){
+                robot.setExtend(robot.rightExtend.getPosition()-0.01);
+            }
 
+            if (gamepad1.dpad_right&&robot.rightHand.getPosition()<0.64){
+                robot.setHand(robot.rightHand.getPosition()+0.004);
+            }
+            else if(gamepad1.dpad_left&&robot.rightHand.getPosition()>0.46){
+                robot.setHand(robot.rightHand.getPosition()-0.004);
+            }
 
-            
-
-            double drive = -gamepad1.left_stick_y * 0.5;
-            double strafe = gamepad1.left_stick_x * 0.5;
-            double rotate = gamepad1.right_stick_x * 0.5;
+            double drive = -gamepad1.left_stick_y * 0.3;
+            double strafe = gamepad1.left_stick_x * 0.3;
+            double rotate = gamepad1.right_stick_x * 0.3;
             robot.drive(strafe, drive, rotate,0);
             telemetry.addData("leftFrontPosition", robot.leftFront.getCurrentPosition());
             telemetry.addData("leftBackPosition", robot.leftBack.getCurrentPosition());
